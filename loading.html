@@ -18,7 +18,7 @@
     .bg {
       position: fixed;
       inset: 0;
-      background: url("mw2_loading.jpg.png") center center no-repeat;
+      background: url("mw2_loading.png") center center no-repeat; /* <-- change if needed */
       background-size: cover;
       transform: scale(1.02);
     }
@@ -84,6 +84,24 @@
       line-height: 1.4;
     }
 
+    /* Music button (MW2-ish) */
+    .musicbtn {
+      position: fixed;
+      top: 6%;
+      right: 5%;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.55);
+      color: #b7ff6a;
+      border: 1px solid rgba(183,255,106,0.35);
+      font-family: Arial, Helvetica, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .musicbtn:active { transform: translateY(1px); }
+    .muted { opacity: 0.7; }
+
     /* Animated dots */
     .dots::after {
       content: "";
@@ -128,6 +146,13 @@
     <p class="intel" id="intel"></p>
   </div>
 
+  <!-- Audio (must be hosted in same folder as this HTML) -->
+  <audio id="bgm" preload="auto" loop>
+    <source src="mw2_lobby.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="musicbtn" id="musicBtn">ENABLE MUSIC</div>
+
   <script>
     // Rotating "INTEL" tips (MW2-ish)
     const tips = [
@@ -137,12 +162,45 @@
       "INTEL: Traitors blend in. Watch patterns, not words.",
       "INTEL: No pay-to-win. Skill issue only."
     ];
-
     const intel = document.getElementById("intel");
     const pick = () => tips[Math.floor(Math.random() * tips.length)];
     intel.textContent = pick();
     setInterval(() => intel.textContent = pick(), 6000);
+
+    // Music logic: try autoplay, fall back to click
+    const bgm = document.getElementById("bgm");
+    const btn = document.getElementById("musicBtn");
+    let playing = false;
+
+    function setBtn() {
+      btn.textContent = playing ? "MUSIC: ON" : "ENABLE MUSIC";
+      btn.classList.toggle("muted", !playing);
+    }
+
+    async function tryPlay() {
+      try {
+        bgm.volume = 0.25;
+        await bgm.play();
+        playing = true;
+        setBtn();
+      } catch (e) {
+        playing = false;
+        setBtn();
+      }
+    }
+
+    btn.addEventListener("click", async () => {
+      if (!playing) {
+        await tryPlay();
+      } else {
+        bgm.pause();
+        playing = false;
+        setBtn();
+      }
+    });
+
+    // Attempt autoplay (may be blocked)
+    tryPlay();
   </script>
 </body>
 </html>
-
