@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Loading...</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Background image */
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("mw2_loading.png") center center no-repeat;
+      background-size: cover;
+      transform: scale(1.02);
+    }
+
+    /* MW2-ish scanlines + subtle flicker */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.22) 0px,
+        rgba(0,0,0,0.22) 1px,
+        rgba(0,0,0,0.00) 3px,
+        rgba(0,0,0,0.00) 6px
+      );
+      mix-blend-mode: multiply;
+      opacity: 0.45;
+      animation: flicker 3.8s infinite;
+    }
+
+    /* Grain overlay */
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+      opacity: 0.12;
+      mix-blend-mode: overlay;
+      transform: scale(1.5);
+      animation: grainMove 1.6s steps(2) infinite;
+    }
+
+    /* HUD text */
+    .hud {
+      position: fixed;
+      left: 5%;
+      bottom: 8%;
+      color: #b7ff6a;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.8);
+      max-width: 90%;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    .line {
+      font-size: 12px;
+      opacity: 0.9;
+      margin: 0 0 6px 0;
+    }
+
+    .intel {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 10px;
+      max-width: 640px;
+      line-height: 1.4;
+    }
+
+    /* Animated dots */
+    .dots::after {
+      content: "";
+      display: inline-block;
+      width: 30px;
+      text-align: left;
+      animation: dots 1.1s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%   { content: ""; }
+      25%  { content: "."; }
+      50%  { content: ".."; }
+      75%  { content: "..."; }
+      100% { content: ""; }
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 0.45; }
+      52% { opacity: 0.35; }
+      54% { opacity: 0.55; }
+      58% { opacity: 0.40; }
+      62% { opacity: 0.50; }
+    }
+
+    @keyframes grainMove {
+      0% { transform: translate(0,0) scale(1.5); }
+      100% { transform: translate(-10px, 12px) scale(1.5); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg"></div>
+  <div class="scanlines"></div>
+  <div class="grain"></div>
+
+  <div class="hud">
+    <p class="title"><span class="dots">Loading</span></p>
+    <p class="line">&gt; MW2 LOBBY TTT</p>
+    <p class="line">&gt; DISCORD: discord.gg/W6tW4BM2</p>
+    <p class="intel" id="intel"></p>
+  </div>
+
+  <script>
+    // Rotating "INTEL" tips (MW2-ish)
+    const tips = [
+      "INTEL: Trust no one. Confirm before you shoot.",
+      "INTEL: Movement wins rounds — don’t stand still.",
+      "INTEL: If it feels too quiet… it’s a trap.",
+      "INTEL: Traitors blend in. Watch patterns, not words.",
+      "INTEL: No pay-to-win. Skill issue only."
+    ];
+
+    const intel = document.getElementById("intel");
+    const pick = () => tips[Math.floor(Math.random() * tips.length)];
+    intel.textContent = pick();
+    setInterval(() => intel.textContent = pick(), 6000);
+  </script>
+</body>
+</html>
