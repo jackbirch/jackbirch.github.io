@@ -14,16 +14,14 @@
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    /* Background image */
     .bg {
       position: fixed;
       inset: 0;
-      background: url("mw2_loading.png") center center no-repeat; /* <-- change if needed */
+      background: url("mw2_loading.png") center center no-repeat;
       background-size: cover;
       transform: scale(1.02);
     }
 
-    /* MW2-ish scanlines + subtle flicker */
     .scanlines {
       position: fixed;
       inset: 0;
@@ -40,7 +38,6 @@
       animation: flicker 3.8s infinite;
     }
 
-    /* Grain overlay */
     .grain {
       position: fixed;
       inset: 0;
@@ -52,7 +49,6 @@
       animation: grainMove 1.6s steps(2) infinite;
     }
 
-    /* HUD text */
     .hud {
       position: fixed;
       left: 5%;
@@ -84,30 +80,10 @@
       line-height: 1.4;
     }
 
-    /* Music button (MW2-ish) */
-    .musicbtn {
-      position: fixed;
-      top: 6%;
-      right: 5%;
-      padding: 10px 14px;
-      background: rgba(0,0,0,0.55);
-      color: #b7ff6a;
-      border: 1px solid rgba(183,255,106,0.35);
-      font-family: Arial, Helvetica, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .musicbtn:active { transform: translateY(1px); }
-    .muted { opacity: 0.7; }
-
-    /* Animated dots */
     .dots::after {
       content: "";
       display: inline-block;
       width: 30px;
-      text-align: left;
       animation: dots 1.1s steps(4, end) infinite;
     }
 
@@ -146,15 +122,13 @@
     <p class="intel" id="intel"></p>
   </div>
 
-  <!-- Audio (must be hosted in same folder as this HTML) -->
-  <audio id="bgm" preload="auto" loop>
-    <source src="mw2_lobby.mp3" type="audio/mpeg">
+  <!-- IMPORTANT: your file is mw2_lobby.ogg (not .mp3) -->
+  <audio id="bgm" preload="auto" loop autoplay>
+    <source src="mw2_lobby.ogg" type="audio/ogg">
   </audio>
 
-  <div class="musicbtn" id="musicBtn">ENABLE MUSIC</div>
-
   <script>
-    // Rotating "INTEL" tips (MW2-ish)
+    // Tips
     const tips = [
       "INTEL: Trust no one. Confirm before you shoot.",
       "INTEL: Movement wins rounds — don’t stand still.",
@@ -167,40 +141,24 @@
     intel.textContent = pick();
     setInterval(() => intel.textContent = pick(), 6000);
 
-    // Music logic: try autoplay, fall back to click
+    // Autoplay attempt (no button)
     const bgm = document.getElementById("bgm");
-    const btn = document.getElementById("musicBtn");
-    let playing = false;
+    bgm.volume = 0.25;
 
-    function setBtn() {
-      btn.textContent = playing ? "MUSIC: ON" : "ENABLE MUSIC";
-      btn.classList.toggle("muted", !playing);
+    async function forcePlay() {
+      try { await bgm.play(); } catch (e) {}
     }
 
-    async function tryPlay() {
-      try {
-        bgm.volume = 0.25;
-        await bgm.play();
-        playing = true;
-        setBtn();
-      } catch (e) {
-        playing = false;
-        setBtn();
-      }
-    }
+    window.addEventListener("load", forcePlay);
+    bgm.addEventListener("canplaythrough", forcePlay);
 
-    btn.addEventListener("click", async () => {
-      if (!playing) {
-        await tryPlay();
-      } else {
-        bgm.pause();
-        playing = false;
-        setBtn();
-      }
-    });
-
-    // Attempt autoplay (may be blocked)
-    tryPlay();
+    // A small retry loop (helps some webviews)
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      forcePlay();
+      if (!bgm.paused || tries >= 10) clearInterval(t);
+    }, 500);
   </script>
 </body>
 </html>
