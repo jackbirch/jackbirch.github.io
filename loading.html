@@ -122,43 +122,42 @@
     <p class="intel" id="intel"></p>
   </div>
 
-  <!-- IMPORTANT: your file is mw2_lobby.ogg (not .mp3) -->
-  <audio id="bgm" preload="auto" loop autoplay>
-    <source src="mw2_lobby.ogg" type="audio/ogg">
-  </audio>
+<audio id="bgm" preload="auto" loop autoplay muted playsinline>
+  <source src="mw2_lobby.ogg" type="audio/ogg">
+</audio>
 
-  <script>
-    // Tips
-    const tips = [
-      "INTEL: Trust no one. Confirm before you shoot.",
-      "INTEL: Movement wins rounds — don’t stand still.",
-      "INTEL: If it feels too quiet… it’s a trap.",
-      "INTEL: Traitors blend in. Watch patterns, not words.",
-      "INTEL: No pay-to-win. Skill issue only."
-    ];
-    const intel = document.getElementById("intel");
-    const pick = () => tips[Math.floor(Math.random() * tips.length)];
-    intel.textContent = pick();
-    setInterval(() => intel.textContent = pick(), 6000);
+<script>
+  const bgm = document.getElementById("bgm");
+  bgm.volume = 0.25;
 
-    // Autoplay attempt (no button)
-    const bgm = document.getElementById("bgm");
-    bgm.volume = 0.25;
+  async function start() {
+    try { await bgm.play(); } catch (e) {}
+  }
 
-    async function forcePlay() {
+  // Start muted autoplay (most likely to succeed)
+  window.addEventListener("load", start);
+  bgm.addEventListener("canplaythrough", start);
+
+  // After it starts, keep trying to unmute for a few seconds
+  let tries = 0;
+  const unmuteTimer = setInterval(async () => {
+    tries++;
+
+    // ensure it is playing
+    if (bgm.paused) {
       try { await bgm.play(); } catch (e) {}
     }
 
-    window.addEventListener("load", forcePlay);
-    bgm.addEventListener("canplaythrough", forcePlay);
+    // attempt unmute
+    bgm.muted = false;
 
-    // A small retry loop (helps some webviews)
-    let tries = 0;
-    const t = setInterval(() => {
-      tries++;
-      forcePlay();
-      if (!bgm.paused || tries >= 10) clearInterval(t);
-    }, 500);
-  </script>
+    // if it actually unmuted and is playing, stop trying
+    if (!bgm.muted && !bgm.paused) clearInterval(unmuteTimer);
+
+    // give up after ~10s
+    if (tries >= 20) clearInterval(unmuteTimer);
+  }, 500);
+</script>
 </body>
 </html>
+
